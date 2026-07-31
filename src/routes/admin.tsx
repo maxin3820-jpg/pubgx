@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -14,7 +14,7 @@ import {
   ChevronDown, Award, Flame, Shield, Eye, X, Settings,
   Plus, Trash2, GripVertical, ToggleLeft, ToggleRight,
   Type, Hash, SlidersHorizontal, AlignLeft, ChevronRight,
-  RotateCcw, Save, AlertTriangle, CheckCircle,
+  RotateCcw, Save, AlertTriangle, CheckCircle, Lock, ChevronLeft,
 } from "lucide-react";
 import { getSurveyResponses, type SurveyRow } from "@/lib/admin.functions";
 import { useSiteConfig } from "@/hooks/use-site-config";
@@ -188,6 +188,35 @@ function FeedbackModal({ row, onClose }: { row: SurveyRow; onClose: () => void }
 
 // ─── Main Component ────────────────────────────────────────────────────────
 function AdminPanel() {
+  // ══════════════════════════════════════════════════════════════════════════
+  // ADMIN PASSWORD PROTECTION
+  // ══════════════════════════════════════════════════════════════════════════
+  const ADMIN_PASSWORD = "Doodle"; // Can be changed to env variable later
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
+
+  // Check if already authenticated in this session
+  useEffect(() => {
+    if (sessionStorage.getItem("adminAuth") === "true") {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      setPasswordError(false);
+      sessionStorage.setItem("adminAuth", "true");
+    } else {
+      setPasswordError(true);
+      setPasswordInput("");
+    }
+  };
+
+  // ══════════════════════════════════════════════════════════════════════════
+
   const fetchRows = useServerFn(getSurveyResponses);
   const { data, isLoading, error, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["survey-responses"],
@@ -340,6 +369,73 @@ function AdminPanel() {
   const uniqueModes = [...new Set(rows.map(r => r.preferred_mode))].sort();
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString() : "—";
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // PASSWORD SCREEN
+  // ══════════════════════════════════════════════════════════════════════════
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0a0e17] via-[#151921] to-[#0a0e17] flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="crate border border-border bg-card/80 backdrop-blur-sm p-8 space-y-6">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/15 text-primary mb-4">
+                <Lock size={32} />
+              </div>
+              <h1 className="stencil text-2xl text-foreground mb-2">Admin Access</h1>
+              <p className="text-sm text-muted-foreground">Enter the admin code to continue</p>
+            </div>
+
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
+                  Admin Code
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={passwordInput}
+                  onChange={(e) => {
+                    setPasswordInput(e.target.value);
+                    setPasswordError(false);
+                  }}
+                  className={`w-full rounded-xl border ${
+                    passwordError ? "border-destructive" : "border-border"
+                  } bg-surface-2/60 px-4 py-3 text-foreground outline-none focus:border-primary transition-colors`}
+                  placeholder="Enter admin code"
+                  autoFocus
+                />
+                {passwordError && (
+                  <p className="mt-2 text-xs text-destructive flex items-center gap-1">
+                    <X size={12} /> Incorrect code. Please try again.
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <Shield size={16} />
+                Access Admin Panel
+              </button>
+            </form>
+
+            <div className="pt-4 border-t border-border">
+              <Link
+                to="/"
+                className="text-xs text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 transition-colors"
+              >
+                <ChevronLeft size={14} />
+                Back to Survey
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  // ══════════════════════════════════════════════════════════════════════════
+
   return (
     <main className="min-h-screen bg-background">
       {selectedRow && <FeedbackModal row={selectedRow} onClose={() => setSelectedRow(null)} />}
@@ -371,6 +467,16 @@ function AdminPanel() {
             </button>
             <button onClick={() => refetch()} className="crate bg-primary px-3 py-2.5 text-xs uppercase tracking-widest text-primary-foreground flex items-center gap-1.5 min-h-[44px]">
               <RefreshCw size={13} /> <span className="hidden sm:inline">Refresh</span>
+            </button>
+            <button 
+              onClick={() => {
+                sessionStorage.removeItem("adminAuth");
+                setIsAuthenticated(false);
+                setPasswordInput("");
+              }} 
+              className="crate border border-destructive/40 px-3 py-2.5 text-xs uppercase tracking-widest text-destructive hover:bg-destructive/10 flex items-center gap-1.5 min-h-[44px]"
+            >
+              <Lock size={13} /> <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
