@@ -1,16 +1,10 @@
-# Netlify configuration for TanStack Start deployment (Static SPA mode)
+# Netlify configuration for TanStack Start deployment
 [build]
   command = "npm run build"
-  publish = ".output/public"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
-
-# SPA fallback for client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
 
 # Security headers
 [[headers]]
