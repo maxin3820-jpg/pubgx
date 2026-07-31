@@ -450,34 +450,52 @@ function AdminPanel() {
 
       {/* ── Top Header ──────────────────────────────────────────────── */}
       <div className="border-b border-border/70 bg-card/50 backdrop-blur-xl sticky top-0 z-30">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="stencil text-2xl sm:text-3xl text-foreground">Command Center</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {totalResponses} responses · Updated {lastUpdated}
-              {todayCount > 0 && <span className="ml-2 text-primary">+{todayCount} today</span>}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link to="/" className="crate border border-border px-3 py-2.5 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground flex items-center gap-1.5 min-h-[44px]">
-              <Eye size={13} /> <span className="hidden sm:inline">Survey</span>
-            </Link>
-            <button onClick={exportCsv} disabled={!rows.length} className="crate border border-border px-3 py-2.5 text-xs uppercase tracking-widest text-foreground disabled:opacity-40 flex items-center gap-1.5 min-h-[44px]">
-              <Download size={13} /> <span className="hidden sm:inline">Export CSV</span>
-            </button>
-            <button onClick={() => refetch()} className="crate bg-primary px-3 py-2.5 text-xs uppercase tracking-widest text-primary-foreground flex items-center gap-1.5 min-h-[44px]">
-              <RefreshCw size={13} /> <span className="hidden sm:inline">Refresh</span>
-            </button>
-            <button 
-              onClick={() => {
-                sessionStorage.removeItem("adminAuth");
-                setIsAuthenticated(false);
-                setPasswordInput("");
-              }} 
-              className="crate border border-destructive/40 px-3 py-2.5 text-xs uppercase tracking-widest text-destructive hover:bg-destructive/10 flex items-center gap-1.5 min-h-[44px]"
-            >
-              <Lock size={13} /> <span className="hidden sm:inline">Logout</span>
-            </button>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex-1 min-w-[200px]">
+              <h1 className="stencil text-2xl sm:text-3xl text-foreground">Command Center</h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {totalResponses} responses · Updated {lastUpdated}
+                {todayCount > 0 && <span className="ml-2 text-primary">+{todayCount} today</span>}
+              </p>
+            </div>
+            
+            {/* Action Buttons - Reorganized */}
+            <div className="flex items-center gap-2">
+              <Link 
+                to="/" 
+                className="crate border border-border px-3 py-2.5 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 min-h-[44px]"
+                title="View Survey"
+              >
+                <Eye size={14} /> <span className="hidden md:inline">View Survey</span>
+              </Link>
+              <button 
+                onClick={() => refetch()} 
+                className="crate border border-border px-3 py-2.5 text-xs uppercase tracking-widest text-foreground hover:bg-surface-2/60 transition-colors flex items-center gap-1.5 min-h-[44px]"
+                title="Refresh Data"
+              >
+                <RefreshCw size={14} /> <span className="hidden md:inline">Refresh</span>
+              </button>
+              <button 
+                onClick={exportCsv} 
+                disabled={!rows.length} 
+                className="crate border border-border px-3 py-2.5 text-xs uppercase tracking-widest text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/10 hover:border-primary/50 transition-colors flex items-center gap-1.5 min-h-[44px]"
+                title="Export to CSV"
+              >
+                <Download size={14} /> <span className="hidden md:inline">Export CSV</span>
+              </button>
+              <button 
+                onClick={() => {
+                  sessionStorage.removeItem("adminAuth");
+                  setIsAuthenticated(false);
+                  setPasswordInput("");
+                }} 
+                className="crate border border-destructive/40 px-3 py-2.5 text-xs uppercase tracking-widest text-destructive hover:bg-destructive/10 hover:border-destructive/60 transition-colors flex items-center gap-1.5 min-h-[44px]"
+                title="Logout"
+              >
+                <Lock size={14} /> <span className="hidden md:inline">Logout</span>
+              </button>
+            </div>
           </div>
         </div>
 
