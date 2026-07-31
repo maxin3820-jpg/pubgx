@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { z } from "zod";
+import { useServerFn } from "@tanstack/react-start";
 import heroDrop from "@/assets/hero-drop.jpg";
 import { useSiteConfig } from "@/hooks/use-site-config";
 import type { SurveyQuestion } from "@/lib/site-config";
+import { submitSurvey } from "@/lib/survey.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -72,6 +74,7 @@ function Chips({ options, value, onChange }: {
 // ── Main Page ───────────────────────────────────────────────────────────────
 function SurveyPage() {
   const { config } = useSiteConfig();
+  const submitFn = useServerFn(submitSurvey);
   
   // Check if survey is closed or in maintenance mode
   const now = new Date();
@@ -197,33 +200,50 @@ function SurveyPage() {
     }
     setErrors({});
     setSubmitting(true);
-    // TODO: replace with Supabase insert when backend is connected
-    await new Promise((res) => setTimeout(res, 800));
-    setSubmitting(false);
-    setDone(true);
     
-    // Clear autosave
-    if (config.enableAutoSave && typeof window !== "undefined") {
-      localStorage.removeItem("survey-autosave");
-    }
-    
-    // Show confetti
-    if (config.successConfettiEnabled) {
-      triggerConfetti();
-    }
-    
-    // Redirect if configured
-    if (config.successRedirectUrl && config.successRedirectDelay >= 0) {
-      if (config.successRedirectDelay === 0) {
-        window.location.href = config.successRedirectUrl;
-      } else {
-        setTimeout(() => {
-          window.location.href = config.successRedirectUrl!;
-        }, config.successRedirectDelay * 1000);
+    try {
+      // Save to Supabase
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { error } = await supabase.from("surveys").insert([parsed.data]);
+      
+      if (error) {
+        console.error("Supabase error:", error);
+        setErrors({ form: "Failed to submit. Please try again." });
+        setSubmitting(false);
+        return;
       }
+      
+      // Success!
+      setSubmitting(false);
+      setDone(true);
+      
+      // Clear autosave
+      if (config.enableAutoSave && typeof window !== "undefined") {
+        localStorage.removeItem("survey-autosave");
+      }
+      
+      // Show confetti
+      if (config.successConfettiEnabled) {
+        triggerConfetti();
+      }
+      
+      // Redirect if configured
+      if (config.successRedirectUrl && config.successRedirectDelay >= 0) {
+        if (config.successRedirectDelay === 0) {
+          window.location.href = config.successRedirectUrl;
+        } else {
+          setTimeout(() => {
+            window.location.href = config.successRedirectUrl!;
+          }, config.successRedirectDelay * 1000);
+        }
+      }
+      
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      console.error("Submit error:", err);
+      setErrors({ form: "Failed to submit. Please check your connection." });
+      setSubmitting(false);
     }
-    
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function triggerConfetti() {

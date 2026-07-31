@@ -18,18 +18,23 @@ export const getSurveyResponses = createServerFn({ method: "GET" }).handler(asyn
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  // If Supabase is not configured, return demo data
-  if (!url || !key || url.trim() === "" || key.trim() === "" || key === "your-service-role-key-here") {
-    const { DEMO_ROWS } = await import("@/lib/demo-data");
-    return DEMO_ROWS;
+  // Supabase must be configured
+  if (!url || !key || url.trim() === "" || key.trim() === "") {
+    throw new Error("Supabase is not configured. Please check your .env file.");
   }
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  
+  // Query the "surveys" table (updated table name)
   const { data, error } = await supabaseAdmin
-    .from("survey_responses")
+    .from("surveys")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("Supabase query error:", error);
+    throw new Error(`Failed to fetch survey data: ${error.message}`);
+  }
+  
   return (data ?? []) as SurveyRow[];
 });
