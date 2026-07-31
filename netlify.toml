@@ -1,21 +1,21 @@
-# Netlify configuration for TanStack Start deployment
+# Netlify configuration for TanStack Start deployment (Static SPA mode)
 [build]
   command = "npm run build"
   publish = ".output/public"
-  functions = ".output/server"
 
 [build.environment]
-  NODE_VERSION = "24.17.0"
+  NODE_VERSION = "20"
 
-# Redirect all requests to the TanStack Start server function
+# SPA fallback for client-side routing
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/server"
+  to = "/index.html"
   status = 200
 
-# Environment variables (set these in Netlify dashboard)
-# SUPABASE_URL
-# SUPABASE_PUBLISHABLE_KEY
-# SUPABASE_SERVICE_ROLE_KEY
-# VITE_SUPABASE_URL
-# VITE_SUPABASE_PUBLISHABLE_KEY
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
