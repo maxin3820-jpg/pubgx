@@ -186,8 +186,8 @@ DECLARE
 BEGIN
   SELECT json_build_object(
     'total_responses', COUNT(*),
-    'avg_hours_per_week', ROUND(AVG(hours_per_week), 1),
-    'avg_pubg_level', ROUND(AVG(pubg_level), 1) FILTER (WHERE pubg_level IS NOT NULL),
+    'avg_hours_per_week', ROUND(AVG(hours_per_week)::numeric, 1),
+    'avg_pubg_level', ROUND((AVG(pubg_level) FILTER (WHERE pubg_level IS NOT NULL))::numeric, 1),
     'responses_with_feedback', COUNT(*) FILTER (WHERE feedback IS NOT NULL AND feedback != ''),
     'responses_with_level', COUNT(*) FILTER (WHERE pubg_level IS NOT NULL),
     'latest_submission', MAX(created_at),
