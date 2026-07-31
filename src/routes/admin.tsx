@@ -1071,13 +1071,13 @@ function CtrlField({ label, hint, children }: { label: string; hint?: string; ch
   );
 }
 
-function CtrlInput({ value, onChange, multiline = false, placeholder = "" }: {
-  value: string; onChange: (v: string) => void; multiline?: boolean; placeholder?: string;
+function CtrlInput({ value, onChange, multiline = false, placeholder = "", type = "text" }: {
+  value: string; onChange: (v: string) => void; multiline?: boolean; placeholder?: string; type?: string;
 }) {
   const cls = "w-full rounded-xl border border-border bg-surface-2/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary placeholder:text-muted-foreground/50 transition-colors";
   return multiline
     ? <textarea value={value} onChange={e => onChange(e.target.value)} rows={3} placeholder={placeholder} className={cls + " resize-none"} />
-    : <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={cls} />;
+    : <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={cls} />;
 }
 
 function CtrlToggle({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label: string }) {
@@ -1405,6 +1405,268 @@ function ControlsTab({ config, update, reset, onSave }: {
           <CtrlInput value={config.footerText} onChange={v => { update({ footerText: v }); onSave(); }} placeholder="Drop Zone Intel · community-run..." />
         </CtrlField>
       </CtrlSection>
+
+      {/* ══════════════════════════════════════════════════════════════════════════
+          NEW ADVANCED CONTROLS (30+ Settings)
+      ══════════════════════════════════════════════════════════════════════════ */}
+
+      {/* ── Appearance & Theme ────────────────────────────────────────────────── */}
+      <CtrlSection title="🎨 Appearance & Theme">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CtrlField label="Primary Color" hint="Brand color (hex code)">
+            <CtrlInput value={config.primaryColor} onChange={v => { update({ primaryColor: v }); onSave(); }} placeholder="#e8b23a" />
+          </CtrlField>
+          <CtrlField label="Background Style">
+            <select value={config.backgroundStyle} onChange={e => { update({ backgroundStyle: e.target.value as any }); onSave(); }} className="w-full rounded-xl border border-border bg-surface-2/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+              <option value="gradient">Gradient</option>
+              <option value="solid">Solid Color</option>
+              <option value="image">Custom Image</option>
+            </select>
+          </CtrlField>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CtrlField label="Font Style">
+            <select value={config.fontFamily} onChange={e => { update({ fontFamily: e.target.value as any }); onSave(); }} className="w-full rounded-xl border border-border bg-surface-2/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+              <option value="default">Default (Outfit)</option>
+              <option value="modern">Modern</option>
+              <option value="playful">Playful</option>
+              <option value="professional">Professional</option>
+            </select>
+          </CtrlField>
+          <CtrlField label="Border Radius">
+            <select value={config.borderRadius} onChange={e => { update({ borderRadius: e.target.value as any }); onSave(); }} className="w-full rounded-xl border border-border bg-surface-2/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+              <option value="sharp">Sharp (0px)</option>
+              <option value="rounded">Rounded (12px)</option>
+              <option value="pill">Pill (999px)</option>
+            </select>
+          </CtrlField>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CtrlField label="Card Opacity" hint="0-100%">
+            <CtrlInput type="number" value={String(config.cardOpacity)} onChange={v => { update({ cardOpacity: Number(v) }); onSave(); }} placeholder="80" />
+          </CtrlField>
+          <div className="space-y-2">
+            <CtrlToggle value={config.enableAnimations} onChange={v => { update({ enableAnimations: v }); onSave(); }} label="Enable Animations" />
+            <CtrlToggle value={config.enableGlassmorphism} onChange={v => { update({ enableGlassmorphism: v }); onSave(); }} label="Glassmorphic Effect" />
+          </div>
+        </div>
+        {config.backgroundStyle === "image" && (
+          <CtrlField label="Background Image URL">
+            <CtrlInput value={config.customBackgroundImage || ""} onChange={v => { update({ customBackgroundImage: v }); onSave(); }} placeholder="https://example.com/image.jpg" />
+          </CtrlField>
+        )}
+        {config.backgroundStyle === "solid" && (
+          <CtrlField label="Background Color (hex)">
+            <CtrlInput value={config.customBackgroundColor || ""} onChange={v => { update({ customBackgroundColor: v }); onSave(); }} placeholder="#0a0e17" />
+          </CtrlField>
+        )}
+      </CtrlSection>
+
+      {/* ── Survey Behavior ────────────────────────────────────────────────── */}
+      <CtrlSection title="⚙️ Survey Behavior">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CtrlField label="Survey Mode">
+            <select value={config.surveyMode} onChange={e => { update({ surveyMode: e.target.value as any }); onSave(); }} className="w-full rounded-xl border border-border bg-surface-2/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+              <option value="multi-step">Multi-Step (one question per page)</option>
+              <option value="single-page">Single Page (all at once)</option>
+              <option value="conversational">Conversational (chat style)</option>
+            </select>
+          </CtrlField>
+          <CtrlField label="Validation Mode">
+            <select value={config.validationMode} onChange={e => { update({ validationMode: e.target.value as any }); onSave(); }} className="w-full rounded-xl border border-border bg-surface-2/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+              <option value="instant">Instant (as user types)</option>
+              <option value="on-blur">On Blur (when field loses focus)</option>
+              <option value="on-submit">On Submit (when form submits)</option>
+            </select>
+          </CtrlField>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <CtrlToggle value={config.showProgressBar} onChange={v => { update({ showProgressBar: v }); onSave(); }} label="Show Progress Bar" />
+          <CtrlToggle value={config.allowMultipleSubmissions} onChange={v => { update({ allowMultipleSubmissions: v }); onSave(); }} label="Allow Multiple Submissions" />
+          <CtrlToggle value={config.showQuestionNumbers} onChange={v => { update({ showQuestionNumbers: v }); onSave(); }} label="Show Question Numbers" />
+          <CtrlToggle value={config.enableAutoSave} onChange={v => { update({ enableAutoSave: v }); onSave(); }} label="Enable Auto-Save" />
+          <CtrlToggle value={config.randomizeQuestions} onChange={v => { update({ randomizeQuestions: v }); onSave(); }} label="Randomize Question Order" />
+          <CtrlToggle value={config.enableQuestionSkip} onChange={v => { update({ enableQuestionSkip: v }); onSave(); }} label="Allow Skipping Questions" />
+        </div>
+        <CtrlField label="Required Fields Indicator">
+          <CtrlInput value={config.requiredFieldsIndicator} onChange={v => { update({ requiredFieldsIndicator: v }); onSave(); }} placeholder="*" />
+        </CtrlField>
+      </CtrlSection>
+
+      {/* ── Success Screen Options ─────────────────────────────────────────────── */}
+      <CtrlSection title="🎉 Success Screen Options">
+        <div className="grid gap-2 sm:grid-cols-2">
+          <CtrlToggle value={config.successConfettiEnabled} onChange={v => { update({ successConfettiEnabled: v }); onSave(); }} label="Show Confetti Animation" />
+          <CtrlToggle value={config.successShowSocialShare} onChange={v => { update({ successShowSocialShare: v }); onSave(); }} label="Show Social Share Buttons" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CtrlField label="Redirect URL (optional)" hint="Redirect after success">
+            <CtrlInput value={config.successRedirectUrl || ""} onChange={v => { update({ successRedirectUrl: v }); onSave(); }} placeholder="https://example.com/thanks" />
+          </CtrlField>
+          <CtrlField label="Redirect Delay (seconds)" hint="0 = no redirect">
+            <CtrlInput type="number" value={String(config.successRedirectDelay)} onChange={v => { update({ successRedirectDelay: Number(v) }); onSave(); }} placeholder="0" />
+          </CtrlField>
+        </div>
+      </CtrlSection>
+
+      {/* ── Response Limits & Scheduling ───────────────────────────────────────── */}
+      <CtrlSection title="📅 Response Limits & Scheduling">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <CtrlField label="Max Total Responses" hint="0 = unlimited">
+            <CtrlInput type="number" value={String(config.maxResponses)} onChange={v => { update({ maxResponses: Number(v) }); onSave(); }} placeholder="0" />
+          </CtrlField>
+          <CtrlField label="Responses Per User" hint="0 = unlimited">
+            <CtrlInput type="number" value={String(config.responseLimit)} onChange={v => { update({ responseLimit: Number(v) }); onSave(); }} placeholder="0" />
+          </CtrlField>
+          <CtrlField label="Data Retention (days)" hint="0 = forever">
+            <CtrlInput type="number" value={String(config.dataRetentionDays)} onChange={v => { update({ dataRetentionDays: Number(v) }); onSave(); }} placeholder="0" />
+          </CtrlField>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CtrlField label="Survey Start Date (optional)" hint="YYYY-MM-DD">
+            <CtrlInput value={config.surveyStartDate || ""} onChange={v => { update({ surveyStartDate: v }); onSave(); }} placeholder="2026-01-01" />
+          </CtrlField>
+          <CtrlField label="Survey End Date (optional)" hint="YYYY-MM-DD">
+            <CtrlInput value={config.surveyEndDate || ""} onChange={v => { update({ surveyEndDate: v }); onSave(); }} placeholder="2026-12-31" />
+          </CtrlField>
+        </div>
+        <CtrlField label="Closed Message">
+          <CtrlInput multiline value={config.closedMessage} onChange={v => { update({ closedMessage: v }); onSave(); }} placeholder="This survey is currently closed..." />
+        </CtrlField>
+        <div className="grid gap-2">
+          <CtrlToggle value={config.maintenanceMode} onChange={v => { update({ maintenanceMode: v }); onSave(); }} label="Maintenance Mode" />
+          {config.maintenanceMode && (
+            <CtrlField label="Maintenance Message">
+              <CtrlInput multiline value={config.maintenanceMessage} onChange={v => { update({ maintenanceMessage: v }); onSave(); }} placeholder="We're performing maintenance..." />
+            </CtrlField>
+          )}
+        </div>
+      </CtrlSection>
+
+      {/* ── Data & Privacy ─────────────────────────────────────────────────────── */}
+      <CtrlSection title="🔒 Data & Privacy">
+        <div className="grid gap-2 sm:grid-cols-2">
+          <CtrlToggle value={config.collectIPAddress} onChange={v => { update({ collectIPAddress: v }); onSave(); }} label="Collect IP Addresses" />
+          <CtrlToggle value={config.collectBrowserInfo} onChange={v => { update({ collectBrowserInfo: v }); onSave(); }} label="Collect Browser Info" />
+          <CtrlToggle value={config.collectGeoLocation} onChange={v => { update({ collectGeoLocation: v }); onSave(); }} label="Request Geolocation" />
+          <CtrlToggle value={config.anonymizeResponses} onChange={v => { update({ anonymizeResponses: v }); onSave(); }} label="Anonymize Responses" />
+          <CtrlToggle value={config.enableGDPRMode} onChange={v => { update({ enableGDPRMode: v }); onSave(); }} label="GDPR Consent Banner" />
+        </div>
+      </CtrlSection>
+
+      {/* ── Integrations & Webhooks ────────────────────────────────────────────── */}
+      <CtrlSection title="🔗 Integrations & Webhooks">
+        <div className="grid gap-4">
+          <CtrlField label="Webhook URL" hint="POST new responses here">
+            <CtrlInput value={config.webhookUrl || ""} onChange={v => { update({ webhookUrl: v }); onSave(); }} placeholder="https://your-server.com/webhook" />
+          </CtrlField>
+          <CtrlField label="Slack Webhook URL">
+            <CtrlInput value={config.slackWebhookUrl || ""} onChange={v => { update({ slackWebhookUrl: v }); onSave(); }} placeholder="https://hooks.slack.com/services/..." />
+          </CtrlField>
+          <CtrlField label="Discord Webhook URL">
+            <CtrlInput value={config.discordWebhookUrl || ""} onChange={v => { update({ discordWebhookUrl: v }); onSave(); }} placeholder="https://discord.com/api/webhooks/..." />
+          </CtrlField>
+        </div>
+        <div className="grid gap-2">
+          <CtrlToggle value={config.enableEmailNotifications} onChange={v => { update({ enableEmailNotifications: v }); onSave(); }} label="Email Notifications" />
+          {config.enableEmailNotifications && (
+            <CtrlField label="Notification Email">
+              <CtrlInput type="email" value={config.notificationEmail || ""} onChange={v => { update({ notificationEmail: v }); onSave(); }} placeholder="admin@example.com" />
+            </CtrlField>
+          )}
+        </div>
+      </CtrlSection>
+
+      {/* ── Analytics & Tracking ───────────────────────────────────────────────── */}
+      <CtrlSection title="📊 Analytics & Tracking">
+        <div className="grid gap-4">
+          <CtrlField label="Google Analytics ID" hint="e.g., G-XXXXXXXXXX">
+            <CtrlInput value={config.googleAnalyticsId || ""} onChange={v => { update({ googleAnalyticsId: v }); onSave(); }} placeholder="G-XXXXXXXXXX" />
+          </CtrlField>
+          <CtrlField label="Facebook Pixel ID">
+            <CtrlInput value={config.facebookPixelId || ""} onChange={v => { update({ facebookPixelId: v }); onSave(); }} placeholder="123456789012345" />
+          </CtrlField>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <CtrlToggle value={config.enableHotjar} onChange={v => { update({ enableHotjar: v }); onSave(); }} label="Enable Hotjar" />
+          <CtrlToggle value={config.trackAbandonmentRate} onChange={v => { update({ trackAbandonmentRate: v }); onSave(); }} label="Track Abandonment Rate" />
+          <CtrlToggle value={config.enableABTesting} onChange={v => { update({ enableABTesting: v }); onSave(); }} label="Enable A/B Testing" />
+        </div>
+      </CtrlSection>
+
+      {/* ── Legal & Links ───────────────────────────────────────────────────────── */}
+      <CtrlSection title="⚖️ Legal & Links">
+        <div className="grid gap-4">
+          <CtrlField label="Privacy Policy URL">
+            <CtrlInput value={config.privacyPolicyUrl || ""} onChange={v => { update({ privacyPolicyUrl: v }); onSave(); }} placeholder="https://example.com/privacy" />
+          </CtrlField>
+          <CtrlField label="Terms of Service URL">
+            <CtrlInput value={config.termsOfServiceUrl || ""} onChange={v => { update({ termsOfServiceUrl: v }); onSave(); }} placeholder="https://example.com/terms" />
+          </CtrlField>
+          <CtrlField label="Contact Email">
+            <CtrlInput type="email" value={config.contactEmail || ""} onChange={v => { update({ contactEmail: v }); onSave(); }} placeholder="support@example.com" />
+          </CtrlField>
+        </div>
+        <CtrlToggle value={config.showPoweredByBranding} onChange={v => { update({ showPoweredByBranding: v }); onSave(); }} label='Show "Powered By" Branding' />
+      </CtrlSection>
+
+      {/* ── Admin Panel Settings ───────────────────────────────────────────────── */}
+      <CtrlSection title="🛡️ Admin Panel Settings">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CtrlField label="Admin Password">
+            <CtrlInput type="password" value={config.adminPassword} onChange={v => { update({ adminPassword: v }); onSave(); }} placeholder="Doodle" />
+          </CtrlField>
+          <CtrlField label="Dashboard Theme">
+            <select value={config.adminDashboardTheme} onChange={e => { update({ adminDashboardTheme: e.target.value as any }); onSave(); }} className="w-full rounded-xl border border-border bg-surface-2/60 px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="auto">Auto (system)</option>
+            </select>
+          </CtrlField>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CtrlField label="Auto-Refresh Interval (sec)" hint="0 = off">
+            <CtrlInput type="number" value={String(config.autoRefreshInterval)} onChange={v => { update({ autoRefreshInterval: Number(v) }); onSave(); }} placeholder="60" />
+          </CtrlField>
+          <div className="space-y-2">
+            <CtrlToggle value={config.enableAdminNotifications} onChange={v => { update({ enableAdminNotifications: v }); onSave(); }} label="Real-time Notifications" />
+            <CtrlToggle value={config.showDemoDataBanner} onChange={v => { update({ showDemoDataBanner: v }); onSave(); }} label="Show Demo Data Banner" />
+          </div>
+        </div>
+      </CtrlSection>
+
+      {/* ── Branding & Assets ──────────────────────────────────────────────────── */}
+      <CtrlSection title="🎭 Branding & Assets">
+        <div className="grid gap-4">
+          <CtrlField label="Custom Logo URL" hint="Displayed in header">
+            <CtrlInput value={config.logoUrl || ""} onChange={v => { update({ logoUrl: v }); onSave(); }} placeholder="https://example.com/logo.png" />
+          </CtrlField>
+          <CtrlField label="Custom Favicon URL" hint="Browser tab icon">
+            <CtrlInput value={config.faviconUrl || ""} onChange={v => { update({ faviconUrl: v }); onSave(); }} placeholder="https://example.com/favicon.ico" />
+          </CtrlField>
+        </div>
+      </CtrlSection>
+
+      {/* ── Prize Banner Colors ────────────────────────────────────────────────── */}
+      <CtrlSection title="🌈 Prize Banner Colors">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CtrlField label="Background Color (hex)" hint="Leave empty for default">
+            <CtrlInput value={config.prizeBackgroundColor || ""} onChange={v => { update({ prizeBackgroundColor: v }); onSave(); }} placeholder="#f59e0b" />
+          </CtrlField>
+          <CtrlField label="Text Color (hex)" hint="Leave empty for default">
+            <CtrlInput value={config.prizeTextColor || ""} onChange={v => { update({ prizeTextColor: v }); onSave(); }} placeholder="#ffffff" />
+          </CtrlField>
+        </div>
+      </CtrlSection>
+
+      {/* ── Submit Button Customization ────────────────────────────────────────── */}
+      <CtrlSection title="🎨 Submit Button Customization">
+        <CtrlField label="Button Color (hex)" hint="Leave empty for default primary color">
+          <CtrlInput value={config.submitButtonColor || ""} onChange={v => { update({ submitButtonColor: v }); onSave(); }} placeholder="#e8b23a" />
+        </CtrlField>
+      </CtrlSection>
+
+      {/* ══════════════════════════════════════════════════════════════════════════ */}
 
       {/* ── Survey Questions ─────────────────────────────────────────── */}
       <div className="crate border border-border bg-card p-5 space-y-4">
